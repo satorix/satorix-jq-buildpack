@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e          # fail fast
+set -o pipefail # do not ignore exit codes when piping output
+set -x          # enable debugging
+
+build_dir=$1
+cache_dir=$2
+env_dir=$3
+jq_dir=$build_dir/vendor/jq
+profiled_dir=$build_dir/.profile.d
+
+bp_dir=$(cd $(dirname $0); cd ..; pwd)
+
+# Load some convenience functions like status(), echo(), and indent()
+source $bp_dir/bin/common.sh
+
+mkdir -p $jq_dir/bin
+
+# Download jq
+status "Download and vendor jq"
+jq_url="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
+curl $jq_url -s -L -o $jq_dir/bin/jq
+chmod +x $jq_dir/bin/jq
+
+mkdir -p $build_dir/.profile.d
+echo 'PATH=$PATH:$HOME/vendor/jq/bin' > $build_dir/.profile.d/jq.sh
