@@ -4,24 +4,30 @@ set -e          # fail fast
 set -o pipefail # do not ignore exit codes when piping output
 #set -x          # enable debugging
 
-build_dir=$1
-cache_dir=$2
-env_dir=$3
-jq_dir=$build_dir/vendor/jq
-profiled_dir=$build_dir/.profile.d
+BUILD_DIR="${1}"
+CACHE_DIR="${2}"
+ENV_DIR="${3}"
+JQ_DIR="${BUILD_DIR}/vendor/jq"
+PROFILED_DIR="${BUILD_DIR}/.profile.d"
 
-bp_dir=$(cd $(dirname $0); cd ..; pwd)
+if [[ -n ${JQ_BIN_URL:-} ]]; then
+	echo 'Using $JQ_BIN_URL from ENV VAR for installation' | indent
+else
+	JQ_BIN_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
+fi
+
+BP_DIR=$(cd "$(dirname "${0}")"; cd ..; pwd)
 
 # Load some convenience functions like status(), echo(), and indent()
-source $bp_dir/bin/common.sh
+source "${BP_DIR}/bin/common.sh"
 
-mkdir -p $jq_dir/bin
+mkdir -p "${JQ_DIR}/bin"
 
 # Download jq
 status "Download and vendor jq"
-jq_url="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
-curl $jq_url -s -L -o $jq_dir/bin/jq
-chmod +x $jq_dir/bin/jq
+curl "${JQ_BIN_URL}" -s -L -o "${JQ_DIR}/bin/jq"
+chmod +x "${JQ_DIR}/bin/jq"
 
-mkdir -p $build_dir/.profile.d
-echo 'PATH=$PATH:$HOME/vendor/jq/bin' > $build_dir/.profile.d/jq.sh
+echo 'Setting up $PATH' | indent
+mkdir -p "${PROFILED_DIR}"
+echo 'PATH=$PATH:$HOME/vendor/jq/bin' > "${PROFILED_DIR}/jq.sh"
