@@ -36,7 +36,7 @@ fi
 mkdir -p "${JQ_DIR}/bin"
 
 # Download jq
-status "Download and vendor jq"
+topic "Download and vendor jq"
 curl "${JQ_BIN_URL}" -s -L -o "${JQ_DIR}/bin/jq"
 chmod +x "${JQ_DIR}/bin/jq"
 
